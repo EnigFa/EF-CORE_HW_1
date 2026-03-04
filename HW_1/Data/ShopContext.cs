@@ -8,11 +8,9 @@ namespace HW_1.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
 
-
         public ShopContext()
         {
         }
-
 
         public ShopContext(DbContextOptions<ShopContext> options)
             : base(options)
@@ -22,9 +20,12 @@ namespace HW_1.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>()
-                .HasOne<Category>()
-                .WithMany()
-                .HasForeignKey(p => p.CategoryId);
+                .HasOne(p => p.Category)              
+                .WithMany()                           
+                .HasForeignKey(p => p.CategoryId)     
+                .HasPrincipalKey(c => c.Id);         
+
+           
         }
     }
 }

@@ -17,52 +17,79 @@ namespace HW_1
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-
             var optionsBuilder = new DbContextOptionsBuilder<ShopContext>();
             string connString = configuration.GetConnectionString("DefaultConnection");
             optionsBuilder.UseSqlServer(connString);
 
             using (var context = new ShopContext(optionsBuilder.Options))
             {
-  
-                var productService = new ProductService(context);
+                var shop = new Shop(context);
 
-        
-                AddTestData(context);
+             
+                Console.WriteLine("\n=== Робота з категоріями ===");
+                shop.ShowAllCategories();
 
-            
-                productService.CreateProduct("Клавіатура механічна", "RGB підсвітка", 2200.0m, 7, 1);
-                productService.UpdateProductName(1, "Телефон оновлений");
-                productService.UpdateProductQuantity(1, 4);
-                productService.DeleteProduct(100);
-                productService.ShowNoStockProducts();
-                productService.ShowTop3MostExpensive();
+                shop.CreateCategory("Одяг");
+                shop.CreateCategory("Взуття");
+
+                shop.ShowAllCategories();
+
+                shop.UpdateCategoryName(3, "Іграшки та розваги");
+
+                shop.ShowAllCategories();
+
+                // shop.DeleteCategory(4);
+
+                Console.WriteLine("\n=== Робота з продуктами ===");
+                shop.ShowAllProducts();
+
+                shop.CreateProduct("Футболка", "Бавовна, розмір M", 499m, 12, 3);
+                shop.CreateProduct("Кросівки Nike", "Білий колір", 3499m, 8, 4);
+
+                shop.ShowAllProducts();
+
+                shop.UpdateProductName(1, "Смартфон Samsung оновлений");
+                shop.UpdateProductQuantity(1, 5); 
+
+                shop.ShowAllProducts();
+
+                // shop.DeleteProduct(10);
+
+
+                shop.ShowCategoryByProductId(1);   
+                shop.ShowCategoryByProductId(5);  
+
+
+                shop.ShowProductsByCategoryId(1);
+                shop.ShowProductsByCategoryId(3);
+                shop.ShowProductsByCategoryId(999);
             }
 
-            Console.WriteLine("\nПрограма завершена. Натисни Enter...");
+            Console.WriteLine("\nПрограма завершена. Натисніть Enter для виходу...");
             Console.ReadLine();
         }
 
-        static void AddTestData(ShopContext context)
+    
+        static void AddTestDataIfNeeded(Shop shop, ShopContext context)
         {
             if (context.Categories.Any())
             {
                 return; 
             }
 
-            var cat1 = new Models.Category { Name = "Електроніка" };
-            var cat2 = new Models.Category { Name = "Книги" };
-            context.Categories.Add(cat1);
-            context.Categories.Add(cat2);
-            context.SaveChanges();
+            Console.WriteLine("Додаємо початкові тестові дані...");
 
-            context.Products.Add(new Models.Product { Name = "Смартфон", Description = "Новий телефон", Price = 15000m, StockQuantity = 0, CategoryId = cat1.Id });
-            context.Products.Add(new Models.Product { Name = "Планшет", Description = "10 дюймів", Price = 12000m, StockQuantity = 2, CategoryId = cat1.Id });
-            context.Products.Add(new Models.Product { Name = "Книга про EF Core", Description = "Посібник", Price = 450m, StockQuantity = 20, CategoryId = cat2.Id });
-            context.Products.Add(new Models.Product { Name = "Монітор 27\"", Description = "Full HD", Price = 6500m, StockQuantity = 0, CategoryId = cat1.Id });
-            context.SaveChanges();
+            shop.CreateCategory("Електроніка");
+            shop.CreateCategory("Книги");
 
-            Console.WriteLine("Додано тестові категорії та товари.");
+            int electronicsId = context.Categories.First(c => c.Name == "Електроніка").Id;
+
+            shop.CreateProduct("Смартфон", "Новий телефон", 15000m, 0, electronicsId);
+            shop.CreateProduct("Планшет", "10 дюймів", 12000m, 2, electronicsId);
+            shop.CreateProduct("Книга про EF Core", "Посібник", 450m, 20, context.Categories.First(c => c.Name == "Книги").Id);
+            shop.CreateProduct("Монітор 27\"", "Full HD", 6500m, 0, electronicsId);
+
+            Console.WriteLine("Тестові дані додані.\n");
         }
     }
 }
